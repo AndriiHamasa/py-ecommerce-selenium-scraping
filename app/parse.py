@@ -121,7 +121,6 @@ def get_random_products(
 
 
 def close_cookie_banner(driver: WebDriver) -> None:
-    print("we are in close_cookie_banner func")
     try:
         cookie_button = WebDriverWait(driver, 10).until(
             expected_conditions.element_to_be_clickable(
@@ -177,27 +176,21 @@ def get_all_products_from_page(
                     ".row.ecomerce-items.ecomerce-items-more"
                 ))
             )
-            print("CLICK MORE BTN ", count_more_btn)
             count_more_btn += 1
         except ElementClickInterceptedException:
             close_cookie_banner(driver)
         except ElementNotInteractableException:
-            print("exit from loop")
             break
 
-    print("we are waiting")
     WebDriverWait(driver, 10).until(
         expected_conditions.presence_of_element_located((
             By.CSS_SELECTOR, ".col-md-4.col-xl-4.col-lg-4"
         ))
     )
-    print("we are taking all cards")
 
     cards = driver.find_elements(
         By.CSS_SELECTOR, ".col-md-4.col-xl-4.col-lg-4"
     )
-
-    print("we will start a loop")
 
     for card in cards:
         products.append(
@@ -232,6 +225,16 @@ def get_all_products_from_page(
         )
 
     return products
+
+
+def write_products_to_csv_file(
+        products: [Product],
+        output_csv_path: str
+) -> None:
+    with open(output_csv_path, "w", encoding="utf-8", newline="") as file:
+        writer = csv.writer(file)
+        writer.writerow(PRODUCT_FIELDS)
+        writer.writerows([astuple(quote) for quote in products])
 
 
 def get_all_products() -> None:
@@ -276,16 +279,5 @@ def get_all_products() -> None:
         write_products_to_csv_file(touch_page, "touch.csv")
 
 
-def write_products_to_csv_file(
-        products: [Product],
-        output_csv_path: str
-) -> None:
-    with open(output_csv_path, "w", encoding="utf-8", newline="") as file:
-        writer = csv.writer(file)
-        writer.writerow(PRODUCT_FIELDS)
-        writer.writerows([astuple(quote) for quote in products])
-
-
 if __name__ == "__main__":
-
     get_all_products()
